@@ -1,66 +1,95 @@
-import * as THREE from "https://cdn.jsdelivr.net/npm/three@latest/build/three.module.js";
+/*
+Sources:
+- https://threejs.org/manual/#en/fundamentals
+- https://threejs.org/manual/#en/textures
+*/
 
-let scene, camera, renderer, cubes;
+import * as THREE from "https://cdn.jsdelivr.net/npm/three@latest/build/three.module.js";
 
 export function main() {
   const canvas = document.querySelector("#c");
-  renderer = new THREE.WebGLRenderer({ antialias: true, canvas });
+  const renderer = new THREE.WebGLRenderer({ antialias: true, canvas });
 
   const fov = 75;
   const aspect = 2;
   const near = 0.1;
   const far = 5;
-  camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-
+  const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
   camera.position.z = 2;
 
-  scene = new THREE.Scene();
+  const scene = new THREE.Scene();
 
   const boxWidth = 1;
   const boxHeight = 1;
   const boxDepth = 1;
-
   const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
 
-  cubes = [
-    makeInstance(geometry, 0x44aa88, 0),
-    makeInstance(geometry, 0x8844aa, -2),
-    makeInstance(geometry, 0xaa8844, 2),
+  const cubes = [];
+  const loader = new THREE.TextureLoader();
+
+  const materials = [
+    new THREE.MeshBasicMaterial({
+      map: loadColorTexture("../assets/flower-1.jpg"),
+    }),
+    new THREE.MeshBasicMaterial({
+      map: loadColorTexture("../assets/flower-2.jpg"),
+    }),
+    new THREE.MeshBasicMaterial({
+      map: loadColorTexture("../assets/flower-3.jpg"),
+    }),
+    new THREE.MeshBasicMaterial({
+      map: loadColorTexture("../assets/flower-4.jpg"),
+    }),
+    new THREE.MeshBasicMaterial({
+      map: loadColorTexture("../assets/flower-5.jpg"),
+    }),
+    new THREE.MeshBasicMaterial({
+      map: loadColorTexture("../assets/flower-6.jpg"),
+    }),
   ];
 
-  cubes.forEach((cube) => scene.add(cube));
+  const cube = new THREE.Mesh(geometry, materials);
+  scene.add(cube);
+  cubes.push(cube);
 
-  const color = 0xffffff;
-  const intensity = 3;
-  const light = new THREE.DirectionalLight(color, intensity);
-  light.position.set(-1, 2, 4);
-  scene.add(light);
-}
+  function resizeRendererToDisplaySize(renderer) {
+    const canvas = renderer.domElement;
+    const width = canvas.clientWidth;
+    const height = canvas.clientHeight;
+    const needResize = canvas.width !== width || canvas.height !== height;
+    if (needResize) {
+      renderer.setSize(width, height, false);
+    }
 
-function render(time) {
-  time *= 0.001;
+    return needResize;
+  }
 
-  cubes.forEach((cube, ndx) => {
-    const speed = 1 + ndx * 0.1;
-    const rot = time * speed;
-    cube.rotation.x = rot;
-    cube.rotation.y = rot;
-  });
+  function loadColorTexture(path) {
+    const texture = loader.load(path);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    return texture;
+  }
 
-  renderer.render(scene, camera);
+  function render(time) {
+    time *= 0.001;
+
+    if (resizeRendererToDisplaySize(renderer)) {
+      const canvas = renderer.domElement;
+      camera.aspect = canvas.clientWidth / canvas.clientHeight;
+      camera.updateProjectionMatrix();
+    }
+
+    cubes.forEach((cube, ndx) => {
+      const speed = 0.2 + ndx * 0.1;
+      const rot = time * speed;
+      cube.rotation.x = rot;
+      cube.rotation.y = rot;
+    });
+
+    renderer.render(scene, camera);
+
+    requestAnimationFrame(render);
+  }
 
   requestAnimationFrame(render);
-}
-
-requestAnimationFrame(render);
-
-function makeInstance(geometry, color, x) {
-  const material = new THREE.MeshPhongMaterial({ color });
-
-  const cube = new THREE.Mesh(geometry, material);
-  scene.add(cube);
-
-  cube.position.x = x;
-
-  return cube;
 }
