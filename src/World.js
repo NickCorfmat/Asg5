@@ -1,56 +1,129 @@
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
+import { MTLLoader } from "three/addons/loaders/MTLLoader.js";
+
 /*
 Sources:
 - https://threejs.org/manual/#en/fundamentals
 - https://threejs.org/manual/#en/textures
+- https://threejs.org/manual/#en/load-obj
 */
-
-import * as THREE from "https://cdn.jsdelivr.net/npm/three@latest/build/three.module.js";
 
 export function main() {
   const canvas = document.querySelector("#c");
   const renderer = new THREE.WebGLRenderer({ antialias: true, canvas });
 
-  const fov = 75;
+  const fov = 45;
   const aspect = 2;
   const near = 0.1;
-  const far = 5;
+  const far = 100;
   const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-  camera.position.z = 2;
+  camera.position.set(0, 10, 20);
+
+  const controls = new OrbitControls(camera, canvas);
+  controls.target.set(0, 5, 0);
+  controls.update();
 
   const scene = new THREE.Scene();
+  scene.background = new THREE.Color("black");
 
-  const boxWidth = 1;
-  const boxHeight = 1;
-  const boxDepth = 1;
-  const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
+  {
+    const planeSize = 80;
 
-  const loadingElem = document.querySelector("#loading");
-  const progressBarElem = loadingElem.querySelector(".progressbar");
+    const loader = new THREE.TextureLoader();
+    const texture = loader.load(
+      "https://threejs.org/manual/examples/resources/images/checker.png"
+    );
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.magFilter = THREE.NearestFilter;
+    const repeats = planeSize / 20;
+    texture.repeat.set(repeats, repeats);
 
-  const cubes = [];
-  const loadManager = new THREE.LoadingManager();
-  const loader = new THREE.TextureLoader(loadManager);
+    const planeGeo = new THREE.PlaneGeometry(planeSize, planeSize);
+    const planeMat = new THREE.MeshPhongMaterial({
+      map: texture,
+      side: THREE.DoubleSide,
+    });
+    const mesh = new THREE.Mesh(planeGeo, planeMat);
+    mesh.rotation.x = Math.PI * -0.5;
+    scene.add(mesh);
+  }
 
-  const materials = [
-    new THREE.MeshBasicMaterial({ map: loader.load("../assets/flower-1.jpg") }),
-    new THREE.MeshBasicMaterial({ map: loader.load("../assets/flower-2.jpg") }),
-    new THREE.MeshBasicMaterial({ map: loader.load("../assets/flower-3.jpg") }),
-    new THREE.MeshBasicMaterial({ map: loader.load("../assets/flower-4.jpg") }),
-    new THREE.MeshBasicMaterial({ map: loader.load("../assets/flower-5.jpg") }),
-    new THREE.MeshBasicMaterial({ map: loader.load("../assets/flower-6.jpg") }),
-  ];
+  {
+    const skyColor = 0xb1e1ff;
+    const groundColor = 0xb97a20;
+    const intensity = 2;
+    const light = new THREE.HemisphereLight(skyColor, groundColor, intensity);
+    scene.add(light);
+  }
 
-  loadManager.onLoad = () => {
-    loadingElem.style.display = "none";
-    const cube = new THREE.Mesh(geometry, materials);
-    scene.add(cube);
-    cubes.push(cube);
-  };
+  {
+    const color = 0xffffff;
+    const intensity = 2.5;
+    const light = new THREE.DirectionalLight(color, intensity);
+    light.position.set(0, 10, 0);
+    light.target.position.set(-5, 0, 0);
+    scene.add(light);
+    scene.add(light.target);
+  }
 
-  loadManager.onProgress = (urlOfLastItemLoaded, itemsLoaded, itemsTotal) => {
-    const progress = itemsLoaded / itemsTotal;
-    progressBarElem.style.transform = `scaleX(${progress})`;
-  };
+  {
+    const objLoader = new OBJLoader();
+    const mtlLoader = new MTLLoader();
+    mtlLoader.load("../assets/models/LegoFigure/LegoFigure.mtl", (mtl) => {
+      mtl.preload();
+      objLoader.setMaterials(mtl);
+      objLoader.load("../assets/models/LegoFigure/LegoFigure.obj", (root) => {
+        root.scale.set(5, 5, 5);
+        scene.add(root);
+
+        // compute the box that contains all the stuff
+        // from root and below
+        const box = new THREE.Box3().setFromObject(root);
+
+        const boxSize = box.getSize(new THREE.Vector3()).length();
+        const boxCenter = box.getCenter(new THREE.Vector3());
+
+        // set the camera to frame the box
+        frameArea(boxSize * 1.2, boxSize, boxCenter, camera);
+
+        // update the Trackball controls to handle the new size
+        controls.maxDistance = boxSize * 10;
+        controls.target.copy(boxCenter);
+        controls.update();
+      });
+    });
+  }
+
+  function frameArea(sizeToFitOnScreen, boxSize, boxCenter, camera) {
+    const halfSizeToFitOnScreen = sizeToFitOnScreen * 0.5;
+    const halfFovY = THREE.MathUtils.degToRad(camera.fov * 0.5);
+    const distance = halfSizeToFitOnScreen / Math.tan(halfFovY);
+
+    // compute a unit vector that points in the direction the camera is now
+    // in the xz plane from the center of the box
+    const direction = new THREE.Vector3()
+      .subVectors(camera.position, boxCenter)
+      .multiply(new THREE.Vector3(1, 0, 1))
+      .normalize();
+
+    // move the camera to a position distance units way from the center
+    // in whatever direction the camera was from the center already
+    camera.position.copy(direction.multiplyScalar(distance).add(boxCenter));
+
+    // pick some near and far values for the frustum that
+    // will contain the box.
+    camera.near = boxSize / 100;
+    camera.far = boxSize * 100;
+
+    camera.updateProjectionMatrix();
+
+    // point the camera to look at the center of the box
+    camera.lookAt(boxCenter.x, boxCenter.y, boxCenter.z);
+  }
 
   function resizeRendererToDisplaySize(renderer) {
     const canvas = renderer.domElement;
@@ -64,27 +137,12 @@ export function main() {
     return needResize;
   }
 
-  function loadColorTexture(path) {
-    const texture = loader.load(path);
-    texture.colorSpace = THREE.SRGBColorSpace;
-    return texture;
-  }
-
-  function render(time) {
-    time *= 0.001;
-
+  function render() {
     if (resizeRendererToDisplaySize(renderer)) {
       const canvas = renderer.domElement;
       camera.aspect = canvas.clientWidth / canvas.clientHeight;
       camera.updateProjectionMatrix();
     }
-
-    cubes.forEach((cube, ndx) => {
-      const speed = 0.2 + ndx * 0.1;
-      const rot = time * speed;
-      cube.rotation.x = rot;
-      cube.rotation.y = rot;
-    });
 
     renderer.render(scene, camera);
 

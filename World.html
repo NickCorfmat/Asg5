@@ -21,6 +21,12 @@ None
       </div>
     </canvas>
     
+    <script  type="importmap">{
+      "imports": {
+        "three": "https://threejs.org/build/three.module.js",
+        "three/addons/": "https://threejs.org/examples/jsm/"
+      }
+    }</script>
     <script type="module">
       import { main } from './src/World.js';
       main();
