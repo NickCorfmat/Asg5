@@ -24,33 +24,33 @@ export function main() {
   const boxDepth = 1;
   const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
 
+  const loadingElem = document.querySelector("#loading");
+  const progressBarElem = loadingElem.querySelector(".progressbar");
+
   const cubes = [];
-  const loader = new THREE.TextureLoader();
+  const loadManager = new THREE.LoadingManager();
+  const loader = new THREE.TextureLoader(loadManager);
 
   const materials = [
-    new THREE.MeshBasicMaterial({
-      map: loadColorTexture("../assets/flower-1.jpg"),
-    }),
-    new THREE.MeshBasicMaterial({
-      map: loadColorTexture("../assets/flower-2.jpg"),
-    }),
-    new THREE.MeshBasicMaterial({
-      map: loadColorTexture("../assets/flower-3.jpg"),
-    }),
-    new THREE.MeshBasicMaterial({
-      map: loadColorTexture("../assets/flower-4.jpg"),
-    }),
-    new THREE.MeshBasicMaterial({
-      map: loadColorTexture("../assets/flower-5.jpg"),
-    }),
-    new THREE.MeshBasicMaterial({
-      map: loadColorTexture("../assets/flower-6.jpg"),
-    }),
+    new THREE.MeshBasicMaterial({ map: loader.load("../assets/flower-1.jpg") }),
+    new THREE.MeshBasicMaterial({ map: loader.load("../assets/flower-2.jpg") }),
+    new THREE.MeshBasicMaterial({ map: loader.load("../assets/flower-3.jpg") }),
+    new THREE.MeshBasicMaterial({ map: loader.load("../assets/flower-4.jpg") }),
+    new THREE.MeshBasicMaterial({ map: loader.load("../assets/flower-5.jpg") }),
+    new THREE.MeshBasicMaterial({ map: loader.load("../assets/flower-6.jpg") }),
   ];
 
-  const cube = new THREE.Mesh(geometry, materials);
-  scene.add(cube);
-  cubes.push(cube);
+  loadManager.onLoad = () => {
+    loadingElem.style.display = "none";
+    const cube = new THREE.Mesh(geometry, materials);
+    scene.add(cube);
+    cubes.push(cube);
+  };
+
+  loadManager.onProgress = (urlOfLastItemLoaded, itemsLoaded, itemsTotal) => {
+    const progress = itemsLoaded / itemsTotal;
+    progressBarElem.style.transform = `scaleX(${progress})`;
+  };
 
   function resizeRendererToDisplaySize(renderer) {
     const canvas = renderer.domElement;
