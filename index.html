@@ -1,0 +1,39 @@
+<!--
+Nick Corfmat
+ncorfmat@ucsc.edu
+
+Notes to Grader:
+None
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="src/styles.css">
+    <title></title>
+  </head>
+
+  <body>
+    <canvas id="c">
+      <div class="split">
+        <div id="view1" tabindex="1"></div>
+        <div id="view2" tabindex="2"></div>
+     </div>
+      <div id="loading">
+        <div class="progress"><div class="progressbar"></div></div>
+      </div>
+    </canvas>
+    
+    <script  type="importmap">{
+      "imports": {
+        "three": "https://threejs.org/build/three.module.js",
+        "three/addons/": "https://threejs.org/examples/jsm/"
+      }
+    }</script>
+    <script type="module">
+      import { main } from './src/main.js';
+      main();
+    </script>
+  </body>
+</html>
