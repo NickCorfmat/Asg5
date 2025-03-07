@@ -64,7 +64,7 @@ export function main() {
 
   // Add Ground Plane
   {
-    const groundGeometry = new THREE.PlaneGeometry(20, 20, 32, 32);
+    const groundGeometry = new THREE.PlaneGeometry(100, 100, 32, 32);
     groundGeometry.rotateX(-Math.PI / 2);
     const groundMaterial = new THREE.MeshStandardMaterial({
       color: 0x555555,
@@ -100,7 +100,7 @@ export function main() {
       });
 
       mesh.position.set(0, 0, 0);
-      mesh.scale.set(0.2, 0.2, 0.2);
+      mesh.scale.set(0.27, 0.27, 0.27);
       scene.add(mesh);
     });
   }
@@ -118,7 +118,7 @@ export function main() {
         }
       });
 
-      mesh.position.set(0, 0, 0);
+      mesh.position.set(-2, 0, 18);
       scene.add(mesh);
     });
   }
