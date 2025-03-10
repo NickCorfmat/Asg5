@@ -71,7 +71,7 @@ export function main() {
     const groundGeometry = new THREE.PlaneGeometry(size, size, 32, 32);
     groundGeometry.rotateX(-Math.PI / 2);
     const groundMaterial = new THREE.MeshStandardMaterial({
-      color: 0x555555,
+      color: 0x808080,
       side: THREE.DoubleSide,
     });
     const groundMesh = new THREE.Mesh(groundGeometry, groundMaterial);
@@ -93,8 +93,7 @@ export function main() {
   // Add Tumbler
   // Source: https://sketchfab.com/3d-models/the-batman-begin-tumbler-83b64fe11adc43dba84a3f27aa0e7ec1
   {
-    gltfLoader.setPath("../assets/models/tumbler/");
-    gltfLoader.load("scene.gltf", (gltf) => {
+    gltfLoader.load("../assets/models/tumbler/scene.gltf", (gltf) => {
       const mesh = gltf.scene;
 
       mesh.traverse((child) => {
@@ -110,21 +109,60 @@ export function main() {
     });
   }
 
+  // Add intersection
+  {
+    gltfLoader.load(
+      "../assets/models/intersection/intersection.gltf",
+      (gltf) => {
+        const mesh = gltf.scene;
+
+        mesh.traverse((child) => {
+          if (child.isMesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+          }
+        });
+
+        mesh.position.set(-2, 0, 18);
+        scene.add(mesh);
+      }
+    );
+  }
+
   // Add roads
   {
-    gltfLoader.setPath("../assets/models/road/");
-    gltfLoader.load("road.gltf", (gltf) => {
+    const scale = 1.7;
+
+    gltfLoader.load("../assets/models/road/road.gltf", (gltf) => {
       const mesh = gltf.scene;
+      mesh.scale.set(scale, scale, scale);
 
-      mesh.traverse((child) => {
-        if (child.isMesh) {
-          child.castShadow = true;
-          child.receiveShadow = true;
-        }
-      });
+      const instances = [
+        { x: 0.7, z: 63, rotation: 0 }, // Front
+        { x: 0.7, z: 80, rotation: 0 },
+        { x: 0.7, z: -63, rotation: 0 }, // Back
+        { x: 0.7, z: -80, rotation: 0 },
+        { x: 0.7, z: -100, rotation: 0 },
+        { x: 0.7, z: -120, rotation: 0 },
+        { x: 63, z: 0.7, rotation: (3 * Math.PI) / 2 }, // Left
+        { x: 80, z: 0.7, rotation: (3 * Math.PI) / 2 },
+        { x: -63, z: 0.7, rotation: (3 * Math.PI) / 2 }, // Right
+        { x: -80, z: 0.7, rotation: (3 * Math.PI) / 2 },
+        { x: -100, z: 0.7, rotation: (3 * Math.PI) / 2 },
+        { x: -120, z: 0.7, rotation: (3 * Math.PI) / 2 },
+        { x: -140, z: 0.7, rotation: (3 * Math.PI) / 2 },
+      ];
 
-      mesh.position.set(-2, 0, 18);
-      scene.add(mesh);
+      for (let i = 0; i < instances.length; i++) {
+        const { x, z, rotation } = instances[i];
+        const instance = mesh.clone();
+
+        instance.scale.set(scale, scale, scale);
+        instance.position.set(x, 0.01, z);
+        instance.rotation.y = rotation;
+
+        scene.add(instance);
+      }
     });
   }
 
@@ -142,15 +180,15 @@ export function main() {
       }
 
       objLoader.load("../assets/models/city/city.obj", (mesh) => {
-        const meshes = [
+        const instances = [
           { x: 105, z: 0, rotation: (3 * Math.PI) / 2 },
           { x: -115, z: 100, rotation: 2 * Math.PI },
-          { x: 0, z: 150, rotation: 2 * Math.PI / 5 },
+          { x: 0, z: 150, rotation: (2 * Math.PI) / 5 },
           { x: -50, z: -100, rotation: 3 * Math.PI },
         ];
 
-        for (let i = 0; i < meshes.length; i++) {
-          const { x, z, rotation } = meshes[i];
+        for (let i = 0; i < instances.length; i++) {
+          const { x, z, rotation } = instances[i];
           const instance = mesh.clone();
 
           instance.scale.set(scale, scale, scale);
