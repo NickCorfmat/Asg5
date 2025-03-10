@@ -42,6 +42,7 @@ export function main() {
 
   // Initialize Scene
   const scene = new THREE.Scene();
+  scene.fog = new THREE.Fog(0xcccccc, 20, 150);
 
   // Add Spotlight
   {
@@ -62,11 +63,6 @@ export function main() {
   {
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     scene.add(ambientLight);
-  }
-
-  // Add fog
-  {
-    scene.fog = new THREE.Fog(0xcccccc, 20, 150);
   }
 
   // Add Ground Plane
