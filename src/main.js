@@ -285,13 +285,18 @@ export function main() {
       { x: 15, y: 0, z: -11, rotation: 0 },
       { x: 13, y: 0, z: -10, rotation: degToRad(15) },
       { x: 15, y: 0, z: -12.5, rotation: degToRad(50) },
+      { x: -4, y: 0, z: -12, rotation: degToRad(25) },
+      { x: -3.5, y: 0, z: -14, rotation: degToRad(45) },
+      { x: -5.5, y: 0.12, z: -14, rotation: degToRad(35) },
+      { x: 5, y: 0, z: -16, rotation: degToRad(35) },
+      { x: 6.5, y: 0.12, z: -17.5, rotation: degToRad(15) },
     ];
 
     for (let i = 0; i < instances.length; i++) {
       const { x, y, z, rotation } = instances[i];
       const crate = new THREE.Mesh(geometry, material);
 
-      crate.position.set(x, y + 0.5, z);
+      crate.position.set(x, y + 0.4, z);
       crate.rotation.y = rotation;
 
       scene.add(crate);
