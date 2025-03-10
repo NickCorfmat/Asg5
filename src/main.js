@@ -3,9 +3,6 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 import { MTLLoader } from "three/addons/loaders/MTLLoader.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
-import { GUI } from "three/addons/libs/lil-gui.module.min.js";
-import { RectAreaLightUniformsLib } from "three/addons/lights/RectAreaLightUniformsLib.js";
-import { RectAreaLightHelper } from "three/addons/helpers/RectAreaLightHelper.js";
 
 /*
 Sources:
@@ -147,6 +144,7 @@ export function main() {
     gltfLoader.load("../assets/models/road/road.gltf", (gltf) => {
       const mesh = gltf.scene;
       mesh.scale.set(scale, scale, scale);
+      mesh.receiveShadow = true;
 
       const instances = [
         { x: 0.7, z: 63, rotation: degToRad(0) }, // Front
@@ -186,8 +184,16 @@ export function main() {
       mtl.preload();
       objLoader.setMaterials(mtl);
 
-      for (const material of Object.values(mtl.materials)) {
+      // Enable lighting on materials code provided by ChatGPT
+      for (const materialName in mtl.materials) {
+        const material = mtl.materials[materialName];
         material.side = THREE.DoubleSide;
+
+        mtl.materials[materialName] = new THREE.MeshStandardMaterial({
+          color: material.color || 0xffffff,
+          map: material.map,
+          side: THREE.DoubleSide,
+        });
       }
 
       objLoader.load("../assets/models/city/city.obj", (mesh) => {
@@ -205,6 +211,9 @@ export function main() {
           instance.scale.set(scale, scale, scale);
           instance.position.set(x, 0, z);
           instance.rotation.y = rotation;
+
+          instance.castShadow = true;
+          instance.receiveShadow = true;
 
           scene.add(instance);
         }
