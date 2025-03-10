@@ -64,6 +64,11 @@ export function main() {
     scene.add(ambientLight);
   }
 
+  // Add fog
+  {
+    scene.fog = new THREE.Fog(0xcccccc, 20, 150);
+  }
+
   // Add Ground Plane
   {
     const size = 300;
@@ -144,10 +149,12 @@ export function main() {
         mesh.rotation.y = (3 * Math.PI) / 2;
         scene.add(mesh);
 
-        const mirroredMesh = mesh.clone();
-        mirroredMesh.scale.x *= -1;
-        mirroredMesh.position.set(-105, 0, 0);
-        scene.add(mirroredMesh);
+        const clone = mesh.clone();
+        clone.scale.x *= -1;
+        clone.scale.x *= -1;
+        clone.position.set(-105, 0, 0);
+        clone.rotation.y = Math.PI / 2;
+        scene.add(clone);
       });
     });
   }
