@@ -41,11 +41,15 @@ export function main() {
   const scene = new THREE.Scene();
   scene.fog = new THREE.Fog(0xbadbe6, 20, 300);
 
-  // Point Light
+  // Spotlight
   {
-    // const pointLight = new THREE.PointLight(0xff0000, 1, 100);
-    // pointLight.position.set(-0.5, 2, -4);
-    // scene.add(pointLight);
+    const spotlight = new THREE.SpotLight(0xe6fffe, 400, 50, degToRad(20), 0.3);
+
+    spotlight.position.set(5, 10, 12);
+    spotlight.target.position.set(0, 0, 0);
+    spotlight.castShadow = true;
+
+    scene.add(spotlight);
   }
 
   // Ambient Light
@@ -60,6 +64,7 @@ export function main() {
     directionalLight.position.set(200, 200, 200);
     directionalLight.castShadow = true;
 
+    // Directional light configurations provided by ChatGPT
     directionalLight.shadow.mapSize.width = 4096;
     directionalLight.shadow.mapSize.height = 4096;
 
@@ -135,7 +140,7 @@ export function main() {
       const mesh = gltf.scene;
       const scale = 1;
       mesh.scale.set(scale, scale, scale);
-      
+
       mesh.traverse((child) => {
         if (child.isMesh) {
           child.castShadow = true;
@@ -145,7 +150,7 @@ export function main() {
 
       const instances = [
         { x: -1, z: -20, rotation: degToRad(5) },
-        { x: 3, z: -30, rotation: degToRad(-7) },
+        { x: 3, z: -30, rotation: degToRad(-5) },
         { x: -1, z: -40, rotation: degToRad(-2) },
       ];
 
