@@ -42,7 +42,7 @@ export function main() {
 
   // Initialize Scene
   const scene = new THREE.Scene();
-  scene.fog = new THREE.Fog(0xcccccc, 20, 150);
+  scene.fog = new THREE.Fog(0xbadbe6, 20, 300);
 
   // Add Spotlight
   {
@@ -67,7 +67,7 @@ export function main() {
 
   // Add Ground Plane
   {
-    const size = 300;
+    const size = 500;
     const groundGeometry = new THREE.PlaneGeometry(size, size, 32, 32);
     groundGeometry.rotateX(-Math.PI / 2);
     const groundMaterial = new THREE.MeshStandardMaterial({
@@ -136,21 +136,29 @@ export function main() {
     mtlLoader.load("../assets/models/city/city.mtl", (mtl) => {
       mtl.preload();
       objLoader.setMaterials(mtl);
+
       for (const material of Object.values(mtl.materials)) {
         material.side = THREE.DoubleSide;
       }
-      objLoader.load("../assets/models/city/city.obj", (mesh) => {
-        mesh.scale.set(scale, scale, scale);
-        mesh.position.set(105, 0, 0);
-        mesh.rotation.y = (3 * Math.PI) / 2;
-        scene.add(mesh);
 
-        const clone = mesh.clone();
-        clone.scale.x *= -1;
-        clone.scale.x *= -1;
-        clone.position.set(-105, 0, 0);
-        clone.rotation.y = Math.PI / 2;
-        scene.add(clone);
+      objLoader.load("../assets/models/city/city.obj", (mesh) => {
+        const meshes = [
+          { x: 105, z: 0, rotation: (3 * Math.PI) / 2 },
+          { x: -115, z: 100, rotation: 2 * Math.PI },
+          { x: 0, z: 150, rotation: 2 * Math.PI / 5 },
+          { x: -50, z: -100, rotation: 3 * Math.PI },
+        ];
+
+        for (let i = 0; i < meshes.length; i++) {
+          const { x, z, rotation } = meshes[i];
+          const instance = mesh.clone();
+
+          instance.scale.set(scale, scale, scale);
+          instance.position.set(x, 0, z);
+          instance.rotation.y = rotation;
+
+          scene.add(instance);
+        }
       });
     });
   }
