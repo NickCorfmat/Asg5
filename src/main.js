@@ -14,6 +14,7 @@ Sources:
 - https://threejs.org/manual/#en/load-obj
 */
 
+const objLoader = new OBJLoader();
 const gltfLoader = new GLTFLoader();
 const textureLoader = new THREE.TextureLoader();
 
@@ -121,6 +122,42 @@ export function main() {
       mesh.position.set(-2, 0, 18);
       scene.add(mesh);
     });
+  }
+
+  // Skyscrapers
+  {
+    const map = [
+      [3, 5, 4, 3, 3],
+      [4, 3, 5, 3, 5],
+      [3, 4, 3, 5, 4],
+      [5, 3, 4, 4, 3],
+      [3, 4, 4, 3, 4],
+    ];
+
+    const size = 10;
+    const gap = 20;
+    const geometry = new THREE.BoxGeometry(size, size, size);
+
+    const texture = textureLoader.load("../assets/images/offices.jpg");
+    texture.colorSpace = THREE.SRGBColorSpace;
+
+    const material = new THREE.MeshBasicMaterial({ map: texture });
+
+    for (let x = 0; x < map[0].length; x++) {
+      for (let z = 0; z < map.length; z++) {
+        const numStories = map[x][z];
+
+        for (let i = 0; i < numStories; i++) {
+          const building = new THREE.Mesh(geometry, material);
+
+          const xOffset = x * (size + gap);
+          const zOffset = z * (size + gap);
+
+          building.position.set(xOffset, i * size + 5, zOffset);
+          scene.add(building);
+        }
+      }
+    }
   }
 
   // Resize Renderer to Fit Display
