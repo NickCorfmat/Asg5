@@ -17,6 +17,7 @@ Sources:
 const objLoader = new OBJLoader();
 const gltfLoader = new GLTFLoader();
 const textureLoader = new THREE.TextureLoader();
+const mtlLoader = new MTLLoader();
 
 export function main() {
   // Initialize Renderer
@@ -65,7 +66,8 @@ export function main() {
 
   // Add Ground Plane
   {
-    const groundGeometry = new THREE.PlaneGeometry(100, 100, 32, 32);
+    const size = 300;
+    const groundGeometry = new THREE.PlaneGeometry(size, size, 32, 32);
     groundGeometry.rotateX(-Math.PI / 2);
     const groundMaterial = new THREE.MeshStandardMaterial({
       color: 0x555555,
@@ -88,6 +90,7 @@ export function main() {
   }
 
   // Add Tumbler
+  // Source: https://sketchfab.com/3d-models/the-batman-begin-tumbler-83b64fe11adc43dba84a3f27aa0e7ec1
   {
     gltfLoader.setPath("../assets/models/tumbler/");
     gltfLoader.load("scene.gltf", (gltf) => {
@@ -125,39 +128,28 @@ export function main() {
   }
 
   // Skyscrapers
+  // Source: https://sketchfab.com/3d-models/low-poly-city-buildings-e0209ac5bb684d2d85e5ade96c92d2ff
   {
-    const map = [
-      [3, 5, 4, 3, 3],
-      [4, 3, 5, 3, 5],
-      [3, 4, 3, 5, 4],
-      [5, 3, 4, 4, 3],
-      [3, 4, 4, 3, 4],
-    ];
+    const scale = 60;
 
-    const size = 10;
-    const gap = 20;
-    const geometry = new THREE.BoxGeometry(size, size, size);
-
-    const texture = textureLoader.load("../assets/images/offices.jpg");
-    texture.colorSpace = THREE.SRGBColorSpace;
-
-    const material = new THREE.MeshBasicMaterial({ map: texture });
-
-    for (let x = 0; x < map[0].length; x++) {
-      for (let z = 0; z < map.length; z++) {
-        const numStories = map[x][z];
-
-        for (let i = 0; i < numStories; i++) {
-          const building = new THREE.Mesh(geometry, material);
-
-          const xOffset = x * (size + gap);
-          const zOffset = z * (size + gap);
-
-          building.position.set(xOffset, i * size + 5, zOffset);
-          scene.add(building);
-        }
+    mtlLoader.load("../assets/models/city/city.mtl", (mtl) => {
+      mtl.preload();
+      objLoader.setMaterials(mtl);
+      for (const material of Object.values(mtl.materials)) {
+        material.side = THREE.DoubleSide;
       }
-    }
+      objLoader.load("../assets/models/city/city.obj", (mesh) => {
+        mesh.scale.set(scale, scale, scale);
+        mesh.position.set(105, 0, 0);
+        mesh.rotation.y = (3 * Math.PI) / 2;
+        scene.add(mesh);
+
+        const mirroredMesh = mesh.clone();
+        mirroredMesh.scale.x *= -1;
+        mirroredMesh.position.set(-105, 0, 0);
+        scene.add(mirroredMesh);
+      });
+    });
   }
 
   // Resize Renderer to Fit Display
