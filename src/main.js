@@ -44,7 +44,7 @@ export function main() {
   const scene = new THREE.Scene();
   scene.fog = new THREE.Fog(0xbadbe6, 20, 300);
 
-  // Add Spotlight
+  // Spotlight
   {
     const spotlight = new THREE.SpotLight(
       0xffffff,
@@ -59,13 +59,13 @@ export function main() {
     scene.add(spotlight);
   }
 
-  // Add Ambient Light
+  // Ambient Light
   {
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     scene.add(ambientLight);
   }
 
-  // Add Ground Plane
+  // Ground Plane
   {
     const size = 500;
     const groundGeometry = new THREE.PlaneGeometry(size, size, 32, 32);
@@ -81,7 +81,7 @@ export function main() {
     scene.add(groundMesh);
   }
 
-  // Add Skybox
+  // Skybox
   {
     textureLoader.load("../assets/images/skybox.jpg", (texture) => {
       texture.mapping = THREE.EquirectangularReflectionMapping;
@@ -90,7 +90,7 @@ export function main() {
     });
   }
 
-  // Add Tumbler
+  // Tumbler
   // Source: https://sketchfab.com/3d-models/the-batman-begin-tumbler-83b64fe11adc43dba84a3f27aa0e7ec1
   {
     gltfLoader.load("../assets/models/tumbler/scene.gltf", (gltf) => {
@@ -109,7 +109,7 @@ export function main() {
     });
   }
 
-  // Add intersection
+  // Intersection
   {
     gltfLoader.load(
       "../assets/models/intersection/intersection.gltf",
@@ -129,7 +129,8 @@ export function main() {
     );
   }
 
-  // Add roads
+  // Roads
+  // Source: https://sketchfab.com/3d-models/low-road-2-7cc26be9fba04f4ca29a76454bfe5dbb
   {
     const scale = 1.7;
 
@@ -199,6 +200,33 @@ export function main() {
         }
       });
     });
+  }
+
+  // Traffic Cones
+  {
+    const scale = 0.04;
+
+    const geometry = new THREE.ConeGeometry(5, 20, 32);
+    const material = new THREE.MeshStandardMaterial({ color: 0xfab250 });
+
+    const startX1 = 8.5;
+    const startX2 = -7;
+    const startZ = 12;
+    const gap = 5;
+
+    const numCones = 10
+
+    for (let i = 0; i < numCones; i++) {
+      const cone1 = new THREE.Mesh(geometry, material);
+      cone1.position.set(startX1, 0.3, startZ + i * gap);
+      cone1.scale.set(scale, scale, scale);
+      scene.add(cone1);
+
+      const cone2 = new THREE.Mesh(geometry, material);
+      cone2.position.set(startX2, 0.3, startZ + i * gap);
+      cone2.scale.set(scale, scale, scale);
+      scene.add(cone2);
+  }
   }
 
   // Resize Renderer to Fit Display
