@@ -41,25 +41,36 @@ export function main() {
   const scene = new THREE.Scene();
   scene.fog = new THREE.Fog(0xbadbe6, 20, 300);
 
-  // Spotlight
+  // Point Light
   {
-    const spotlight = new THREE.SpotLight(
-      0xffffff,
-      10,
-      100,
-      degToRad(45),
-      0.2,
-      0.5
-    );
-    spotlight.target.position.set(0, 0, 0);
-    spotlight.castShadow = true;
-    scene.add(spotlight);
+    // const pointLight = new THREE.PointLight(0xff0000, 1, 100);
+    // pointLight.position.set(-0.5, 2, -4);
+    // scene.add(pointLight);
   }
 
   // Ambient Light
   {
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     scene.add(ambientLight);
+  }
+
+  // Directional Light
+  {
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.6);
+    directionalLight.position.set(200, 200, 200);
+    directionalLight.castShadow = true;
+
+    directionalLight.shadow.mapSize.width = 4096;
+    directionalLight.shadow.mapSize.height = 4096;
+
+    directionalLight.shadow.camera.left = -100;
+    directionalLight.shadow.camera.right = 100;
+    directionalLight.shadow.camera.top = 100;
+    directionalLight.shadow.camera.bottom = -100;
+    directionalLight.shadow.camera.near = 0.5;
+    directionalLight.shadow.camera.far = 500;
+
+    scene.add(directionalLight);
   }
 
   // Ground Plane
@@ -110,9 +121,44 @@ export function main() {
         }
       });
 
-      mesh.position.set(0, 0, 0);
+      mesh.position.set(0, 0, 1);
+      mesh.rotation.y = degToRad(2);
       mesh.scale.set(0.27, 0.27, 0.27);
       scene.add(mesh);
+    });
+  }
+
+  // Police Car
+  // Source: https://sketchfab.com/3d-models/los-angeles-police-department-car-795fa0620bc44db8afcb06720a4dadd7
+  {
+    gltfLoader.load("../assets/models/police/police.gltf", (gltf) => {
+      const mesh = gltf.scene;
+      const scale = 1;
+      mesh.scale.set(scale, scale, scale);
+      
+      mesh.traverse((child) => {
+        if (child.isMesh) {
+          child.castShadow = true;
+          child.receiveShadow = true;
+        }
+      });
+
+      const instances = [
+        { x: -1, z: -20, rotation: degToRad(5) },
+        { x: 3, z: -30, rotation: degToRad(-7) },
+        { x: -1, z: -40, rotation: degToRad(-2) },
+      ];
+
+      for (let i = 0; i < instances.length; i++) {
+        const { x, z, rotation } = instances[i];
+        const instance = mesh.clone();
+
+        instance.scale.set(scale, scale, scale);
+        instance.position.set(x, 0, z);
+        instance.rotation.y = rotation;
+
+        scene.add(instance);
+      }
     });
   }
 
@@ -125,7 +171,6 @@ export function main() {
 
         mesh.traverse((child) => {
           if (child.isMesh) {
-            child.castShadow = true;
             child.receiveShadow = true;
           }
         });
@@ -166,6 +211,8 @@ export function main() {
         const { x, z, rotation } = instances[i];
         const instance = mesh.clone();
 
+        instance.receiveShadow = true;
+
         instance.scale.set(scale, scale, scale);
         instance.position.set(x, 0.01, z);
         instance.rotation.y = rotation;
@@ -204,6 +251,13 @@ export function main() {
           { x: -50, z: -100, rotation: degToRad(540) },
         ];
 
+        mesh.traverse((child) => {
+          if (child.isMesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+          }
+        });
+
         for (let i = 0; i < instances.length; i++) {
           const { x, z, rotation } = instances[i];
           const instance = mesh.clone();
@@ -211,9 +265,6 @@ export function main() {
           instance.scale.set(scale, scale, scale);
           instance.position.set(x, 0, z);
           instance.rotation.y = rotation;
-
-          instance.castShadow = true;
-          instance.receiveShadow = true;
 
           scene.add(instance);
         }
@@ -231,6 +282,13 @@ export function main() {
       (gltf) => {
         const mesh = gltf.scene;
         mesh.scale.set(scale, scale, scale);
+
+        mesh.traverse((child) => {
+          if (child.isMesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+          }
+        });
 
         const instances = [
           { x: -25, z: -32, rotation: degToRad(90) },
@@ -267,11 +325,15 @@ export function main() {
 
     for (let i = 0; i < numCones; i++) {
       const cone1 = new THREE.Mesh(geometry, material);
+      cone1.castShadow = true;
+      cone1.receiveShadow = true;
       cone1.position.set(startX1, 0.3, startZ + i * gap);
       cone1.scale.set(scale, scale, scale);
       scene.add(cone1);
 
       const cone2 = new THREE.Mesh(geometry, material);
+      cone2.castShadow = true;
+      cone2.receiveShadow = true;
       cone2.position.set(startX2, 0.3, startZ + i * gap);
       cone2.scale.set(scale, scale, scale);
       scene.add(cone2);
@@ -304,6 +366,9 @@ export function main() {
     for (let i = 0; i < instances.length; i++) {
       const { x, y, z, rotation } = instances[i];
       const crate = new THREE.Mesh(geometry, material);
+
+      crate.castShadow = true;
+      crate.receiveShadow = true;
 
       crate.position.set(x, y + 0.4, z);
       crate.rotation.y = rotation;
