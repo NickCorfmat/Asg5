@@ -9,12 +9,27 @@ Sources:
 - https://threejs.org/manual/#en/fundamentals
 - https://threejs.org/manual/#en/textures
 - https://threejs.org/manual/#en/load-obj
+- Importing glTF models - https://youtu.be/aOQuuotM-Ww?feature=shared
+- Fog - https://youtu.be/k1zGz55EqfU?feature=shared
 */
 
 const objLoader = new OBJLoader();
 const gltfLoader = new GLTFLoader();
 const textureLoader = new THREE.TextureLoader();
 const mtlLoader = new MTLLoader();
+
+let startTime = performance.now() / 1000.0;
+let seconds = performance.now() / 1000.0 - startTime;
+
+let newsCameraXYZ = computeNewsCameraXYZ();
+
+function computeNewsCameraXYZ() {
+  const x = 33 * Math.cos(seconds / 3);
+  const z = 33 * Math.sin(seconds / 3);
+  const y = 35 + 5 * Math.sin(seconds / 3);
+
+  return { x: x, y: y, z: z };
+}
 
 export function main() {
   // Initialize Renderer
@@ -25,21 +40,26 @@ export function main() {
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
+  // Initialize Scene
+  const scene = new THREE.Scene();
+  scene.fog = new THREE.Fog(0xbadbe6, 20, 300);
+
   // Initialize Camera
   const fov = 45;
   const aspect = 2;
   const near = 0.001;
   const far = 1000;
   const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-  camera.position.set(-6.6, 4, 7);
+  camera.position.set(15.3, 10.8, 16);
+
+  const newsCamera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+  newsCamera.position.set(newsCameraXYZ.x, newsCameraXYZ.y, newsCameraXYZ.z);
+  newsCamera.lookAt(0, 0, 0);
+  scene.add(newsCamera);
 
   // Initialize Controls
   const controls = new OrbitControls(camera, canvas);
   controls.target.set(0, 0, 0);
-
-  // Initialize Scene
-  const scene = new THREE.Scene();
-  scene.fog = new THREE.Fog(0xbadbe6, 20, 300);
 
   // Spotlight
   {
@@ -118,6 +138,7 @@ export function main() {
   {
     gltfLoader.load("../assets/models/tumbler/scene.gltf", (gltf) => {
       const mesh = gltf.scene;
+      const scale = 0.28;
 
       mesh.traverse((child) => {
         if (child.isMesh) {
@@ -128,7 +149,7 @@ export function main() {
 
       mesh.position.set(0, 0, 1);
       mesh.rotation.y = degToRad(2);
-      mesh.scale.set(0.27, 0.27, 0.27);
+      mesh.scale.set(scale, scale, scale);
       scene.add(mesh);
     });
   }
@@ -168,6 +189,7 @@ export function main() {
   }
 
   // Intersection
+  // Source: https://www.cgtrader.com/products/road-junction-67b99834-9654-4fb4-90f0-e2b827d3b56f
   {
     gltfLoader.load(
       "../assets/models/intersection/intersection.gltf",
@@ -326,7 +348,7 @@ export function main() {
     const startZ = 12;
     const gap = 5;
 
-    const numCones = 10;
+    const numCones = 11;
 
     for (let i = 0; i < numCones; i++) {
       const cone1 = new THREE.Mesh(geometry, material);
@@ -386,6 +408,13 @@ export function main() {
     return (degrees * Math.PI) / 180;
   }
 
+  function animateScene() {
+    newsCameraXYZ = computeNewsCameraXYZ();
+
+    newsCamera.position.set(newsCameraXYZ.x, newsCameraXYZ.y, newsCameraXYZ.z);
+    newsCamera.lookAt(0, 0, 0);
+  }
+
   // Resize Renderer to Fit Display
   function resizeRendererToDisplaySize(renderer) {
     const canvas = renderer.domElement;
@@ -400,13 +429,40 @@ export function main() {
 
   // Render Loop
   function render() {
+    seconds = performance.now() / 1000.0 - startTime;
+
     if (resizeRendererToDisplaySize(renderer)) {
       const canvas = renderer.domElement;
       camera.aspect = canvas.clientWidth / canvas.clientHeight;
       camera.updateProjectionMatrix();
     }
+
     controls.update();
+
+    renderer.setViewport(0, 0, canvas.clientWidth, canvas.clientHeight);
+    renderer.setScissorTest(false);
     renderer.render(scene, camera);
+
+    const minimapSize = 300;
+    const paddingX = 40;
+    const paddingY = 20;
+    renderer.setViewport(
+      paddingX,
+      canvas.clientHeight - minimapSize - paddingY,
+      (16 / 11) * minimapSize + paddingX,
+      minimapSize - paddingY
+    );
+    renderer.setScissor(
+      paddingX,
+      canvas.clientHeight - minimapSize - paddingY,
+      (16 / 11) * minimapSize + paddingX,
+      minimapSize - paddingY
+    );
+    renderer.setScissorTest(true);
+    renderer.render(scene, newsCamera);
+
+    animateScene();
+
     requestAnimationFrame(render);
   }
 
