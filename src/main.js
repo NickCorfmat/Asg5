@@ -143,7 +143,7 @@ export function main() {
     const groundGeometry = new THREE.PlaneGeometry(size, size, 32, 32);
     groundGeometry.rotateX(degToRad(-90));
 
-    const texture = textureLoader.load("./Asg5/assets/images/sidewalk.png");
+    const texture = textureLoader.load("./assets/images/sidewalk.png");
 
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
@@ -164,7 +164,7 @@ export function main() {
 
   // Skybox
   {
-    textureLoader.load("./Asg5/assets/images/skybox.jpg", (texture) => {
+    textureLoader.load("./assets/images/skybox.jpg", (texture) => {
       texture.mapping = THREE.EquirectangularReflectionMapping;
       texture.colorSpace = THREE.SRGBColorSpace;
       scene.background = texture;
@@ -174,7 +174,7 @@ export function main() {
   // Tumbler
   // Source: https://sketchfab.com/3d-models/the-batman-begin-tumbler-83b64fe11adc43dba84a3f27aa0e7ec1
   {
-    gltfLoader.load("./Asg5/assets/models/tumbler/scene.gltf", (gltf) => {
+    gltfLoader.load("./assets/models/tumbler/scene.gltf", (gltf) => {
       const mesh = gltf.scene;
       const scale = 0.28;
 
@@ -195,7 +195,7 @@ export function main() {
   // Police Car
   // Source: https://sketchfab.com/3d-models/los-angeles-police-department-car-795fa0620bc44db8afcb06720a4dadd7
   {
-    gltfLoader.load("./Asg5/assets/models/police/police.gltf", (gltf) => {
+    gltfLoader.load("./assets/models/police/police.gltf", (gltf) => {
       const mesh = gltf.scene;
       const scale = 1;
       mesh.scale.set(scale, scale, scale);
@@ -230,7 +230,7 @@ export function main() {
   // Source: https://www.cgtrader.com/products/road-junction-67b99834-9654-4fb4-90f0-e2b827d3b56f
   {
     gltfLoader.load(
-      "./Asg5/assets/models/intersection/intersection.gltf",
+      "./assets/models/intersection/intersection.gltf",
       (gltf) => {
         const mesh = gltf.scene;
 
@@ -251,7 +251,7 @@ export function main() {
   {
     const scale = 1.7;
 
-    gltfLoader.load("./Asg5/assets/models/road/road.gltf", (gltf) => {
+    gltfLoader.load("./assets/models/road/road.gltf", (gltf) => {
       const mesh = gltf.scene;
       mesh.scale.set(scale, scale, scale);
       mesh.receiveShadow = true;
@@ -292,7 +292,7 @@ export function main() {
   {
     const scale = 60;
 
-    mtlLoader.load("./Asg5/assets/models/city/city.mtl", (mtl) => {
+    mtlLoader.load("./assets/models/city/city.mtl", (mtl) => {
       mtl.preload();
       objLoader.setMaterials(mtl);
 
@@ -308,7 +308,7 @@ export function main() {
         });
       }
 
-      objLoader.load("./Asg5/assets/models/city/city.obj", (mesh) => {
+      objLoader.load("./assets/models/city/city.obj", (mesh) => {
         const instances = [
           { x: 105, z: 0, rotation: degToRad(270) },
           { x: -115, z: 100, rotation: degToRad(360) },
@@ -343,7 +343,7 @@ export function main() {
     const scale = 1.8;
 
     gltfLoader.load(
-      "./Asg5/assets/models/londonbuilding/londonbuilding.gltf",
+      "./assets/models/londonbuilding/londonbuilding.gltf",
       (gltf) => {
         const mesh = gltf.scene;
         mesh.scale.set(scale, scale, scale);
@@ -410,7 +410,7 @@ export function main() {
     const size = 0.8;
     const geometry = new THREE.BoxGeometry(size, size, size);
 
-    const texture = textureLoader.load("./Asg5/assets/images/crate.png");
+    const texture = textureLoader.load("./assets/images/crate.png");
     texture.colorSpace = THREE.SRGBColorSpace;
 
     const material = new THREE.MeshStandardMaterial({
