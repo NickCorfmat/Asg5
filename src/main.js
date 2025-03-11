@@ -5,12 +5,41 @@ import { MTLLoader } from "three/addons/loaders/MTLLoader.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
 /*
+Nick Corfmat
+ncorfmat@ucsc.edu
+
 Sources:
 - https://threejs.org/manual/#en/fundamentals
 - https://threejs.org/manual/#en/textures
 - https://threejs.org/manual/#en/load-obj
 - Importing glTF models - https://youtu.be/aOQuuotM-Ww?feature=shared
 - Fog - https://youtu.be/k1zGz55EqfU?feature=shared
+
+Notes to Grader:
+- At least 3 different primary shapes:
+  - Cone, Cube, and Cylinder
+
+- At least one textured primary shape
+  - Cubes textured to represent crate boxes
+
+- Custom Textured OBJ model
+  - Skyscrapers
+
+- Orbit Controls enabled
+
+- At least 3 different light sources
+  - Directional Light, Ambient Light, Spot Light
+
+- Skybox included
+
+- At least 20 primary shapes:
+  - 22 cones
+  - 8 textured cubes
+  - 1 animated cylinder
+
+- Extra 1: Fog
+- Extra 2: Second animated camera
+- Extra 3: Shadows
 */
 
 const objLoader = new OBJLoader();
@@ -22,11 +51,20 @@ let startTime = performance.now() / 1000.0;
 let seconds = performance.now() / 1000.0 - startTime;
 
 let newsCameraXYZ = computeNewsCameraXYZ();
+let barrelXYZ = computeBarrelXYZ();
 
 function computeNewsCameraXYZ() {
   const x = 33 * Math.cos(seconds / 3);
   const z = 33 * Math.sin(seconds / 3);
   const y = 35 + 5 * Math.sin(seconds / 3);
+
+  return { x: x, y: y, z: z };
+}
+
+function computeBarrelXYZ() {
+  const x = 2;
+  const y = 0.5;
+  const z = 10 * Math.sin(seconds / 3) - 15;
 
   return { x: x, y: y, z: z };
 }
@@ -404,6 +442,15 @@ export function main() {
     }
   }
 
+  // Barrel
+  const geometry = new THREE.CylinderGeometry(0.5, 0.5, 1.75, 32);
+  const material = new THREE.MeshStandardMaterial({ color: 0x1f4028 });
+  const barrel = new THREE.Mesh(geometry, material);
+
+  barrel.position.set(barrelXYZ.x, barrelXYZ.y, barrelXYZ.z);
+  barrel.rotation.z = degToRad(90);
+  scene.add(barrel);
+
   function degToRad(degrees) {
     return (degrees * Math.PI) / 180;
   }
@@ -413,6 +460,10 @@ export function main() {
 
     newsCamera.position.set(newsCameraXYZ.x, newsCameraXYZ.y, newsCameraXYZ.z);
     newsCamera.lookAt(0, 0, 0);
+
+    barrelXYZ = computeBarrelXYZ();
+
+    barrel.position.set(barrelXYZ.x, barrelXYZ.y, barrelXYZ.z);
   }
 
   // Resize Renderer to Fit Display
@@ -443,9 +494,9 @@ export function main() {
     renderer.setScissorTest(false);
     renderer.render(scene, camera);
 
-    const minimapSize = 300;
-    const paddingX = 40;
-    const paddingY = 20;
+    const minimapSize = canvas.clientWidth / 5;
+    const paddingX = 20;
+    const paddingY = 10;
     renderer.setViewport(
       paddingX,
       canvas.clientHeight - minimapSize - paddingY,
