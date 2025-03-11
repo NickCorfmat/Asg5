@@ -42,7 +42,7 @@ export function main() {
 
   // Initialize Scene
   const scene = new THREE.Scene();
-  scene.fog = new THREE.Fog(0xbadbe6, 20, 300);
+  scene.fog = new THREE.Fog(0xbadbe6, 20, 200);
 
   // Initialize Camera
   const fov = 45;
